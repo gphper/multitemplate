@@ -1,7 +1,16 @@
+/*
+ * @Description:
+ * @Author: gphper
+ * @Date: 2021-07-28 19:30:07
+ */
 package multitemplate
 
-import "html/template"
-import "github.com/gin-gonic/gin/render"
+import (
+	"html/template"
+	"io/fs"
+
+	"github.com/gin-gonic/gin/render"
+)
 
 // Renderer type is the Agnostic Renderer for multitemplates.
 // When gin is in debug mode then all multitemplates works with
@@ -15,4 +24,6 @@ type Renderer interface {
 	AddFromString(name, templateString string) *template.Template
 	AddFromStringsFuncs(name string, funcMap template.FuncMap, templateStrings ...string) *template.Template
 	AddFromFilesFuncs(name string, funcMap template.FuncMap, files ...string) *template.Template
+	AddFromFs(name string, fs fs.FS, patterns ...string) *template.Template
+	AddFromFsFuncs(name string, funcMap template.FuncMap, fs fs.FS, patterns ...string) *template.Template
 }

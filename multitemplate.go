@@ -3,6 +3,7 @@ package multitemplate
 import (
 	"fmt"
 	"html/template"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin/render"
@@ -72,6 +73,19 @@ func (r Render) AddFromStringsFuncs(name string, funcMap template.FuncMap, templ
 func (r Render) AddFromFilesFuncs(name string, funcMap template.FuncMap, files ...string) *template.Template {
 	tname := filepath.Base(files[0])
 	tmpl := template.Must(template.New(tname).Funcs(funcMap).ParseFiles(files...))
+	r.Add(name, tmpl)
+	return tmpl
+}
+
+func (r Render) AddFromFs(name string, fs fs.FS, patterns ...string) *template.Template {
+	tmpl := template.Must(template.ParseFS(fs, patterns...))
+	r.Add(name, tmpl)
+	return tmpl
+}
+
+func (r Render) AddFromFsFuncs(name string, funcMap template.FuncMap, fs fs.FS, patterns ...string) *template.Template {
+	tname := filepath.Base(patterns[0])
+	tmpl := template.Must(template.New(tname).Funcs(funcMap).ParseFS(fs, patterns...))
 	r.Add(name, tmpl)
 	return tmpl
 }

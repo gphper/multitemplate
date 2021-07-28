@@ -3,6 +3,7 @@ package multitemplate
 import (
 	"fmt"
 	"html/template"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -132,6 +133,21 @@ func (r DynamicRender) AddFromFilesFuncs(name string, funcMap template.FuncMap, 
 	builder.buildType = filesFuncTemplateType
 	r[name] = builder
 	return builder.buildTemplate()
+}
+
+//AddFromFs supply golang 1.16 embed
+func (r DynamicRender) AddFromFs(name string, fs fs.FS, patterns ...string) *template.Template {
+	tmpl := template.Must(template.ParseFS(fs, patterns...))
+	r.Add(name, tmpl)
+	return tmpl
+}
+
+//AddFromFsFuncs supply golang 1.16 embed
+func (r DynamicRender) AddFromFsFuncs(name string, funcMap template.FuncMap, fs fs.FS, patterns ...string) *template.Template {
+	tname := filepath.Base(patterns[0])
+	tmpl := template.Must(template.New(tname).Funcs(funcMap).ParseFS(fs, patterns...))
+	r.Add(name, tmpl)
+	return tmpl
 }
 
 // Instance supply render string
