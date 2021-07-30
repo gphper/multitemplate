@@ -1,4 +1,4 @@
-module github.com/gin-contrib/multitemplate
+module github.com/gphper/multitemplate
 
 require (
 	github.com/gin-gonic/gin v1.6.3
