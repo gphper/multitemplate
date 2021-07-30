@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
+	"github.com/gphper/multitemplate"
 )
 
 func createMyRender() multitemplate.Renderer {

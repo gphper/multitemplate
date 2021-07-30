@@ -3,8 +3,8 @@ package main
 import (
 	"path/filepath"
 
-	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
+	"github.com/gphper/multitemplate"
 )
 
 func main() {

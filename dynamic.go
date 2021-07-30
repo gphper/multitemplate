@@ -43,6 +43,8 @@ const (
 	stringTemplateType
 	stringFuncTemplateType
 	filesFuncTemplateType
+	fsTemplateType
+	fsFuncTemplateType
 )
 
 // Builder for dynamic templates
@@ -55,6 +57,7 @@ type templateBuilder struct {
 	templateString  string
 	funcMap         template.FuncMap
 	templateStrings []string
+	fs              fs.FS
 }
 
 func (tb templateBuilder) buildTemplate() *template.Template {
@@ -63,6 +66,8 @@ func (tb templateBuilder) buildTemplate() *template.Template {
 		return tb.tmpl
 	case filesTemplateType:
 		return template.Must(template.ParseFiles(tb.files...))
+	case fsTemplateType:
+		return template.Must(template.ParseFS(tb.fs, tb.files...))
 	case globTemplateType:
 		return template.Must(template.ParseGlob(tb.glob))
 	case stringTemplateType:
@@ -75,6 +80,8 @@ func (tb templateBuilder) buildTemplate() *template.Template {
 		return tmpl
 	case filesFuncTemplateType:
 		return template.Must(template.New(tb.templateName).Funcs(tb.funcMap).ParseFiles(tb.files...))
+	case fsFuncTemplateType:
+		return template.Must(template.New(tb.templateName).Funcs(tb.funcMap).ParseFS(tb.fs, tb.files...))
 	default:
 		panic("Invalid builder type for dynamic template")
 	}
@@ -137,17 +144,20 @@ func (r DynamicRender) AddFromFilesFuncs(name string, funcMap template.FuncMap, 
 
 //AddFromFs supply golang 1.16 embed
 func (r DynamicRender) AddFromFs(name string, fs fs.FS, patterns ...string) *template.Template {
-	tmpl := template.Must(template.ParseFS(fs, patterns...))
-	r.Add(name, tmpl)
-	return tmpl
+	builder := &templateBuilder{templateName: name, files: patterns, fs: fs}
+	builder.buildType = fsTemplateType
+	r[name] = builder
+	return builder.buildTemplate()
+
 }
 
 //AddFromFsFuncs supply golang 1.16 embed
 func (r DynamicRender) AddFromFsFuncs(name string, funcMap template.FuncMap, fs fs.FS, patterns ...string) *template.Template {
 	tname := filepath.Base(patterns[0])
-	tmpl := template.Must(template.New(tname).Funcs(funcMap).ParseFS(fs, patterns...))
-	r.Add(name, tmpl)
-	return tmpl
+	builder := &templateBuilder{templateName: tname, funcMap: funcMap, files: patterns, fs: fs}
+	builder.buildType = fsFuncTemplateType
+	r[name] = builder
+	return builder.buildTemplate()
 }
 
 // Instance supply render string
